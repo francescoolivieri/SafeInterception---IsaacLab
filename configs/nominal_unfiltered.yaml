@@ -1,0 +1,13 @@
+# Reference row for M2 and M3: the obstacle-blind nominal PPO without a safety filter.
+name: nominal_unfiltered
+task: TargetInterception-State-Large-v0
+num_envs: 256
+env_overrides: {}
+
+policy:
+  type: skrl_checkpoint
+  checkpoint: data/checkpoints/nominal_ppo_s0/checkpoints/agent_150000.pt
+
+filter: null
+
+output_dir: outputs/benchmark/nominal_unfiltered

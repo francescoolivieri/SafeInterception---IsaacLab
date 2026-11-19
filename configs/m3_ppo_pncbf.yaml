@@ -1,0 +1,23 @@
+# M3: obstacle-blind nominal PPO (same checkpoint as M2) filtered by the learned PNCBF
+# certificate. Thesis settings: kappa_V = 1.5 on both sides (alpha_safe, alpha_unsafe),
+# value shift eps = 0.01.
+# The suite follows the task (large arena, in distribution); scripts/evaluate.py --ood-room
+# reruns it in the room (thesis: 200 envs there).
+name: m3_ppo_pncbf
+task: TargetInterception-State-Large-v0
+num_envs: 256
+env_overrides: {}
+
+policy:
+  type: skrl_checkpoint
+  checkpoint: data/checkpoints/nominal_ppo_s0/checkpoints/agent_150000.pt
+
+filter:
+  type: pncbf
+  params:
+    checkpoint: data/checkpoints/m3_pncbf_certificate_s0/checkpoints/certificate_final.pt
+    alpha_safe: 1.5
+    alpha_unsafe: 1.5
+    value_shift: 0.01
+
+output_dir: outputs/benchmark/m3_ppo_pncbf

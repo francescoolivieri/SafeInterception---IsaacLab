@@ -1,0 +1,28 @@
+# Resolved specs are saved with each checkpoint; later edits won't change its model.
+graph_input:
+  mode: relation
+  obs_radius: 8.0
+  normalize: true
+  clip_threshold: 5.0
+
+networks:
+  graph_actor:
+    encoder: &gnn
+      type: graph
+      backbone: attention_aggregation
+      layers: 1
+      out_dim: 128
+      msg_dim: 128
+      hid_msg: [256, 256]
+      hid_aggr: [128, 128]
+      hid_update: [256, 256]
+    fusion: &fusion [512, 256, 256]
+    head: {type: gaussian, scale_hid: 128, scale_final: 0.01, std_init: 0.25, std_min: 1.0e-5}
+  graph_critic:
+    encoder: *gnn
+    fusion: *fusion
+    head: &value {type: value, outputs: 1}
+  joint_constraint_value:
+    encoder: {<<: *gnn, layers: 2}
+    fusion: *fusion
+    head: *value

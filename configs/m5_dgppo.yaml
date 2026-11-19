@@ -1,0 +1,13 @@
+# M5: DG-PPO, applied without a safety filter.
+# The suite follows the task (large arena, in distribution); scripts/evaluate.py --ood-room
+# reruns it in the room (thesis: 200 envs there).
+name: m5_dgppo
+task: TargetInterception-State-Large-v0
+num_envs: 256
+env_overrides: {}
+
+policy:
+  type: dgppo_checkpoint
+  checkpoint: data/checkpoints/m5_dgppo_s0/checkpoints/agent_800000.pt
+
+output_dir: outputs/benchmark/m5_dgppo

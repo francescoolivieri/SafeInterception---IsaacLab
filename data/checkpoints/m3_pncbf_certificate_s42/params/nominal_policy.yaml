@@ -1,0 +1,3 @@
+task: TargetInterception-State-Large-v0
+certificate_seed: 42
+nominal_checkpoint: data/checkpoints/nominal_ppo_s42/checkpoints/agent_150000.pt

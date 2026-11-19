@@ -1,0 +1,143 @@
+seed: 0
+env:
+  terminate_on_safety_violation: false
+  enable_clip_states: false
+  terminate_on_out_of_boundaries: true
+  enable_closing_speed_capture_penalty: true
+  curriculum_total_steps: 400000
+  velocity_command_scale_m_s:
+  - 2.0
+  - 2.0
+  - 1.0
+  dgppo_cost_margin: 0.5
+  dgppo_length_scale_xy: 4.0
+  dgppo_length_scale_z: 1.5
+agent:
+  alpha: 2.0
+  cbf_eps: 0.01
+  cbf_weight: 1.0
+  cbf_schedule_fractions:
+  - 0.01
+  - 0.5
+  - 0.49
+  cbf_schedule_multipliers:
+  - 1.0
+  - 2.0
+  - 4.0
+  networks:
+    policy:
+      encoder:
+        type: graph
+        backbone: attention_aggregation
+        layers: 1
+        out_dim: 128
+        msg_dim: 128
+        hid_msg:
+        - 256
+        - 256
+        hid_aggr:
+        - 128
+        - 128
+        hid_update:
+        - 256
+        - 256
+      fusion:
+      - 512
+      - 256
+      - 256
+      head:
+        type: gaussian
+        scale_hid: 128
+        scale_final: 0.01
+        std_init: 0.25
+        std_min: 1.0e-05
+    vl:
+      encoder:
+        type: graph
+        backbone: attention_aggregation
+        layers: 1
+        out_dim: 128
+        msg_dim: 128
+        hid_msg:
+        - 256
+        - 256
+        hid_aggr:
+        - 128
+        - 128
+        hid_update:
+        - 256
+        - 256
+      fusion:
+      - 512
+      - 256
+      - 256
+      head:
+        type: value
+        outputs: 1
+    vh:
+      encoder:
+        type: graph
+        backbone: attention_aggregation
+        layers: 2
+        out_dim: 128
+        msg_dim: 128
+        hid_msg:
+        - 256
+        - 256
+        hid_aggr:
+        - 128
+        - 128
+        hid_update:
+        - 256
+        - 256
+      fusion:
+      - 512
+      - 256
+      - 256
+      head:
+        type: value
+        outputs: 1
+  graph_input:
+    mode: relation
+    obs_radius: 8.0
+    normalize: true
+    clip_threshold: 5.0
+  rollouts: 32
+  learning_epochs: 4
+  mini_batches: 4
+  discount_factor: 0.995
+  gae_lambda: 0.95
+  ratio_clip: 0.25
+  grad_norm_clip: 0.8
+  entropy_loss_scale: 0.003
+  vl_loss_scale: 1.0
+  vh_loss_scale: 1.0
+  lr_policy: 0.0002107803614435091
+  lr_vl: 0.00019246772522762382
+  lr_vh: 0.00019246772522762382
+  experiment:
+    directory: logs/projects/target_interception/m5_dgppo_large_s0
+    experiment_name: 2026-11-06_00-28-56
+    write_interval: auto
+    checkpoint_interval: auto
+    store_separately: false
+    wandb: true
+    wandb_kwargs:
+      project: target_interception_dgppo
+      entity: ''
+      name: m5-dgppo-large-s0
+      sync_tensorboard: false
+      dir: logs/projects/target_interception/m5_dgppo_large_s0/2026-11-06_00-28-56
+      config:
+        task: TargetInterception-State-Large-v0
+        algorithm: dgppo
+        seed: 0
+        num_envs: 4096
+        total_frames: 3276800000
+        scenario_pool: clutter_train_pool_large
+trainer:
+  timesteps: 800000
+  environment_info: log
+  headless: true
+  disable_progressbar: false
+  close_environment_at_exit: false

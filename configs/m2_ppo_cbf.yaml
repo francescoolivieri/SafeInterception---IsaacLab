@@ -1,0 +1,20 @@
+# M2: obstacle-blind nominal PPO filtered by the first-order CBF-QP.
+# Thesis settings: d_safe 0.36 m, alpha 1.5 1/s.
+# The suite follows the task (large arena, in distribution); scripts/evaluate.py --ood-room
+# reruns it in the room (thesis: 200 envs there).
+name: m2_ppo_cbf
+task: TargetInterception-State-Large-v0
+num_envs: 256
+env_overrides: {}
+
+policy:
+  type: skrl_checkpoint
+  checkpoint: data/checkpoints/nominal_ppo_s0/checkpoints/agent_150000.pt
+
+filter:
+  type: cbf_qp
+  params:
+    d_safe: 0.36
+    alpha: 1.5
+
+output_dir: outputs/benchmark/m2_ppo_cbf

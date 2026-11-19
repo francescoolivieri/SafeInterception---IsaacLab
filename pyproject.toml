@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "target_interception"
+version = "1.0.0"
+description = "Safe target interception with a quadrotor pursuer: scenarios, task, methods M1-M5 and evaluation."
+requires-python = ">=3.10"
+dependencies = ["torch", "numpy", "scipy", "pyyaml", "qpsolvers[quadprog]", "osqp", "skrl==2.1.0", "torch_geometric"]
+
+[tool.setuptools.packages.find]
+include = ["target_interception*"]
+
+[tool.setuptools.package-data]
+"target_interception.task.agents" = ["*.yaml"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# ROS launch_testing plugins (present when ROS is sourced) break collection.
+addopts = "-p no:launch_testing -p no:launch_ros -p no:cacheprovider"

@@ -1,0 +1,80 @@
+seed: 0
+
+# M4: standard skrl PPO on the penalty reward, with the same graph architecture as M5.
+env:
+  # M4 reward: penalty_safety applies the same weight independently to the altitude,
+  # xy boundary and collision violations.
+  reward_pos: 3.7384779440286717
+  reward_body_rates_roll_pitch: 0.0005172705819670797
+  reward_body_rates_yaw: 0.004909551246339162
+  reward_action_smoothness: 0.01
+  reward_success: 31.852436859999766
+  enable_closing_speed_capture_penalty: false
+  closing_speed_safe_mps: 2.0
+  closing_speed_alpha: 3.0
+  penalty_safety: 4.06893384906473
+  # Staged curriculum on its own pool (penalty_large_staged), see scenarios/penalty_curriculum.py.
+  scenario:
+    curriculum_profile: penalty_staged
+  penalty_timeout: 10.0
+  terminate_on_safety_violation: false
+  enable_clip_states: false
+  terminate_on_out_of_boundaries: true
+
+# Networks and their graph input are defined once in networks.yaml; the actor
+# is the DG-PPO actor, the critic its one-output counterpart.
+networks:
+  policy: graph_actor
+  value: graph_critic
+graph_input: default
+
+memory:
+  class: RandomMemory
+  memory_size: -1
+
+agent:
+  class: PPO
+  rollouts: 48
+  learning_epochs: 8
+  mini_batches: 16
+  discount_factor: 0.995
+  gae_lambda: 0.9
+  learning_rate: 2.0e-04
+  learning_rate_scheduler: KLAdaptiveLR
+  learning_rate_scheduler_kwargs:
+    kl_threshold: 0.004
+  # Raw physical observations must reach graph construction unchanged. The
+  # graph_model preprocessor selectively normalizes relation/motion features.
+  observation_preprocessor: null
+  observation_preprocessor_kwargs: null
+  value_preprocessor: RunningStandardScaler
+  value_preprocessor_kwargs: null
+  random_timesteps: 0
+  learning_starts: 0
+  grad_norm_clip: 1.0
+  ratio_clip: 0.2
+  value_clip: 0.2
+  entropy_loss_scale: 0.01
+  value_loss_scale: 2.0
+  kl_threshold: 0.0
+  rewards_shaper_scale: 1.0
+  time_limit_bootstrap: false
+  experiment:
+    directory: "training/ppo_graph"
+    experiment_name: ""
+    write_interval: auto
+    checkpoint_interval: auto
+    store_separately: false
+    wandb: true
+    wandb_kwargs:
+      project: "target_interception_ppo_graph"
+      entity: ""
+      name: ""
+
+trainer:
+  class: SequentialTrainer
+  timesteps: 400000
+  environment_info: log
+  headless: true
+  disable_progressbar: false
+  close_environment_at_exit: true

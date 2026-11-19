@@ -1,0 +1,68 @@
+seed: 0
+
+
+env:
+  terminate_on_safety_violation: false
+  enable_clip_states: false
+  terminate_on_out_of_boundaries: true
+  enable_closing_speed_capture_penalty: true
+  curriculum_total_steps: 400000    # after this, phase 4 stays fixed while the CBF weight ramps
+  velocity_command_scale_m_s: [2.0, 2.0, 1.0]
+  
+  dgppo_cost_margin: 0.5        # eps
+  dgppo_length_scale_xy: 4.0    # L for walls and pillars [m]
+  dgppo_length_scale_z: 1.5     # L for floor and ceiling [m]
+
+# DG-PPO hyper-parameters, read by DGPPOAgentCfg / DGPPOAgent / DGPPORunner
+agent:
+  alpha:        2.0     # class-K gain of the discrete CBF condition
+  cbf_eps:      0.01    # CBF slack
+  cbf_weight:   1.0     # weight of the CBF term in the advantage
+  cbf_schedule_fractions: [0.01, 0.5, 0.49]
+  cbf_schedule_multipliers: [1.0, 2.0, 4.0]  # post-curriculum CBF-weight stages
+
+  # Networks and their graph input are defined once in networks.yaml.
+  networks:
+    policy: graph_actor
+    vl: graph_critic
+    vh: joint_constraint_value  # one V_h output trained on the worst constraint
+  graph_input: default
+
+  # PPO / GAE
+  rollouts:         32
+  learning_epochs:  4
+  mini_batches:     4
+  discount_factor:  0.995
+  gae_lambda:       0.95
+  ratio_clip:       0.25
+  grad_norm_clip:   0.8
+  entropy_loss_scale: 0.003
+  vl_loss_scale:    1.0
+  vh_loss_scale:    1.0
+
+  # Learning rates
+  lr_policy: 0.0002107803614435091
+  lr_vl:     0.00019246772522762382
+  lr_vh:     0.00019246772522762382
+
+  # skrl experiment logging
+  experiment:
+    directory: "training/dgppo"
+    experiment_name: ""
+    write_interval: auto
+    checkpoint_interval: auto
+    store_separately: false
+    wandb: true
+    wandb_kwargs:
+      project: "target_interception_dgppo"
+      entity: ""
+      name: ""
+      sync_tensorboard: false
+
+# - Trainer settings, read by skrl SequentialTrainer
+trainer:
+  timesteps: 800000
+  environment_info: log
+  headless: true
+  disable_progressbar: false
+  close_environment_at_exit: true

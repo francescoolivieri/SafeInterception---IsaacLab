@@ -1,0 +1,15 @@
+# M4: penalised graph PPO, applied without a safety filter.
+# The suite follows the task (large arena, in distribution); scripts/evaluate.py --ood-room
+# reruns it in the room (thesis: 200 envs there).
+name: m4_ppo_penalty
+task: TargetInterception-State-Penalty-Large-v0
+num_envs: 256
+env_overrides: {}
+
+policy:
+  type: skrl_checkpoint
+  checkpoint: data/checkpoints/m4_penalty_graph_ppo_s0/checkpoints/agent_400000.pt
+
+filter: null
+
+output_dir: outputs/benchmark/m4_ppo_penalty

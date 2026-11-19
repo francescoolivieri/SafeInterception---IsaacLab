@@ -1,0 +1,25 @@
+ego:
+- 0
+- 18
+target:
+- 18
+- 24
+extras:
+  obstacles:
+  - 24
+  - 72
+  obstacle_vel:
+  - 72
+  - 104
+  previous_action:
+  - 104
+  - 108
+arena_min:
+- -2.694
+- -2.205
+- 0.05
+arena_max:
+- 2.694
+- 2.205
+- 1.9
+obs_dim: 108

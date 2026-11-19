@@ -1,0 +1,48 @@
+seed: 0
+
+# M3 certificate: a PNCBF fitted to a frozen obstacle-blind nominal velocity PPO
+# (thesis recipe). Launch with scripts/train.py --algorithm PNCBF --nominal-checkpoint <ckpt>;
+# for policy iteration add --policy-filter-checkpoint <previous certificate>.
+env:
+  # Continue through ordinary violations, but end excursions beyond the outer
+  # arena limit. Keep the final violation in the target; never clamp the plant.
+  terminate_on_success: false
+  terminate_on_safety_violation: false
+  terminate_on_out_of_boundaries: true
+  enable_clip_states: false
+  # The full mixed-clutter distribution from the start.
+  curriculum_phase_fractions: [0.0, 0.0, 0.0, 1.0]
+  curriculum_blend_fraction: 0.0
+  # Obstacle distance of the certified h (contact is 0.29 m).
+  pncbf_obstacle_clearance: 0.36
+
+agent:
+  hidden: [256, 256, 256]   # slot and plane MLPs
+  rollout_steps: 64
+  gradient_steps: 8
+  batch_size: 16384
+  replay_rollouts: 8
+  learning_rate: 3.0e-4
+  weight_decay: 1.0e-1
+  # Upstream quadcircle schedule, stage lengths scaled to the optimizer budget.
+  # Horizons are in environment steps; gamma_h = exp(-lambda_h dt).
+  discount_schedule:
+    initial_horizon: 100.0
+    final_horizon: 100.0
+    final_lambda: 0.5
+    warmup_fraction: 0.3125       # upstream 100k / 320k
+    horizon_end_fraction: 0.53125 # upstream 170k / 320k
+    decay_end_fraction: 0.84375   # upstream 270k / 320k; then hold
+    # Upstream tgt_rhs: weight of the bootstrapped branch, ramped over the horizon growth.
+    initial_bootstrap_weight: 0.0
+    final_bootstrap_weight: 0.9
+  target_tau: 0.005
+  grad_norm_clip: 10.0
+  checkpoint_interval: 2500   # updates (rare); plus certificate_final.pt
+  experiment:
+    directory: "training/pncbf"
+    experiment_name: ""
+    wandb: false
+
+trainer:
+  timesteps: 300000   # 4,688 updates x 64-step rollouts; 1.2e9 frames at 4096 envs

@@ -1,0 +1,58 @@
+seed: 42
+env:
+  terminate_on_success: false
+  terminate_on_safety_violation: false
+  terminate_on_out_of_boundaries: true
+  enable_clip_states: false
+  curriculum_phase_fractions:
+  - 0.0
+  - 0.0
+  - 0.0
+  - 1.0
+  curriculum_blend_fraction: 0.0
+  pncbf_obstacle_clearance: 0.36
+agent:
+  hidden:
+  - 256
+  - 256
+  - 256
+  rollout_steps: 64
+  gradient_steps: 8
+  batch_size: 16384
+  replay_rollouts: 8
+  learning_rate: 0.0003
+  weight_decay: 0.1
+  discount_schedule:
+    initial_horizon: 100.0
+    final_horizon: 100.0
+    final_lambda: 0.5
+    warmup_fraction: 0.3125
+    horizon_end_fraction: 0.53125
+    decay_end_fraction: 0.84375
+    initial_bootstrap_weight: 0.0
+    final_bootstrap_weight: 0.9
+  target_tau: 0.005
+  grad_norm_clip: 10.0
+  checkpoint_interval: 2500
+  experiment:
+    directory: logs/projects/target_interception/pncbf_tanh_s42
+    experiment_name: pi4
+    wandb: false
+    wandb_kwargs:
+      dir: logs/projects/target_interception/pncbf_tanh_s42/pi4
+      name: state_large_pncbf_pi4
+      config:
+        task: TargetInterception-State-Large-v0
+        algorithm: pncbf
+        seed: 42
+        num_envs: 4096
+        total_frames: 1228800000
+        scenario_pool: clutter_train_pool_large
+  policy_filter:
+    alpha_safe: 1.5
+    alpha_unsafe: 1.5
+    value_shift: 0.01
+    checkpoint: logs/projects/target_interception/pncbf_tanh_s42/pi3/checkpoints/certificate_final.pt
+trainer:
+  timesteps: 300000
+  close_environment_at_exit: false

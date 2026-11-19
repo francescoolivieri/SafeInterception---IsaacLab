@@ -1,0 +1,87 @@
+seed: 42
+env:
+  reward_pos: 3.7384779440286717
+  reward_body_rates_roll_pitch: 0.0005172705819670797
+  reward_body_rates_yaw: 0.004909551246339162
+  reward_action_smoothness: 0.01
+  reward_success: 31.852436859999766
+  enable_closing_speed_capture_penalty: false
+  closing_speed_safe_mps: 2.0
+  closing_speed_alpha: 3.0
+  penalty_safety: 4.06893384906473
+  penalty_timeout: 10.0
+  terminate_on_safety_violation: false
+  enable_clip_states: false
+  terminate_on_out_of_boundaries: true
+  scenario: {pool_name: clutter_train_pool_large}
+networks:
+  policy:
+    encoder:
+      type: graph
+      backbone: attention_aggregation
+      layers: 1
+      out_dim: 128
+      msg_dim: 128
+      n_heads: 3
+      hid_msg: [256, 256]
+      hid_aggr: [128, 128]
+      hid_update: [256, 256]
+    fusion: [512, 256, 256]
+    head: {type: gaussian, scale_hid: 128, scale_final: 0.01, std_init: 0.25, std_min: 1.0e-05}
+  value:
+    encoder:
+      type: graph
+      backbone: attention_aggregation
+      layers: 1
+      out_dim: 128
+      msg_dim: 128
+      n_heads: 3
+      hid_msg: [256, 256]
+      hid_aggr: [128, 128]
+      hid_update: [256, 256]
+    fusion: [512, 256, 256]
+    head: {type: value, outputs: 1}
+graph_input: {mode: relation, obs_radius: 8.0, normalize: true, clip_threshold: 5.0}
+memory: {class: RandomMemory, memory_size: -1}
+agent:
+  class: PPO
+  rollouts: 48
+  learning_epochs: 8
+  mini_batches: 16
+  discount_factor: 0.995
+  gae_lambda: 0.9
+  learning_rate: 0.0002
+  learning_rate_scheduler: KLAdaptiveLR
+  learning_rate_scheduler_kwargs: {kl_threshold: 0.004}
+  observation_preprocessor: null
+  observation_preprocessor_kwargs: null
+  value_preprocessor: RunningStandardScaler
+  value_preprocessor_kwargs: null
+  random_timesteps: 0
+  learning_starts: 0
+  grad_norm_clip: 1.0
+  ratio_clip: 0.2
+  value_clip: 0.2
+  entropy_loss_scale: 0.01
+  value_loss_scale: 2.0
+  kl_threshold: 0.0
+  rewards_shaper_scale: 1.0
+  time_limit_bootstrap: false
+  experiment:
+    directory: logs/projects/target_interception/m4_large_staged
+    experiment_name: 2026-10-19_11-29-10_job1232750
+    write_interval: auto
+    checkpoint_interval: auto
+    store_separately: false
+    wandb: true
+    wandb_kwargs:
+      project: target_interception_ppo_graph
+      entity: ''
+      name: state_penalty_large_ppo_graph_2026-10-19_11-29-10_job1232750
+      sync_tensorboard: false
+      dir: logs/projects/target_interception/m4_large_staged/2026-10-19_11-29-10_job1232750
+      config: {task: TargetInterception-State-Penalty-Large-v0, algorithm: ppo_graph,
+        seed: 42, num_envs: 4096, total_frames: 1638400000, control_mode: velocity,
+        target_runtime: kinematic, scenario_pool: m4_large_staged_v1}
+trainer: {class: SequentialTrainer, timesteps: 400000, environment_info: log, headless: true,
+  disable_progressbar: false, close_environment_at_exit: false}
